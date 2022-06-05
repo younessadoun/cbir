@@ -1,0 +1,56 @@
+<html>
+<head>
+<title>test0.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #808080;}
+.s3 { color: #6897bb;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+test0.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">cv2 </span><span class="s0">as </span><span class="s1">cv</span>
+<span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np</span>
+
+
+<span class="s0">def </span><span class="s1">color_moments(filename):</span>
+    <span class="s1">img = cv.imread(filename)</span>
+    <span class="s0">if </span><span class="s1">img </span><span class="s0">is None</span><span class="s1">:</span>
+        <span class="s0">return</span>
+    <span class="s2"># Convert BGR to HSV colorspace</span>
+    <span class="s1">hsv = cv.cvtColor(img</span><span class="s0">, </span><span class="s1">cv.COLOR_BGR2HSV)</span>
+    <span class="s2"># Split the channels - h,s,v</span>
+    <span class="s1">h</span><span class="s0">, </span><span class="s1">s</span><span class="s0">, </span><span class="s1">v = cv.split(hsv)</span>
+    <span class="s2"># Initialize the color feature</span>
+    <span class="s1">color_feature = []</span>
+    <span class="s2"># N = h.shape[0] * h.shape[1]</span>
+    <span class="s2"># The first central moment - average</span>
+    <span class="s1">h_mean = np.mean(h)  </span><span class="s2"># np.sum(h)/float(N)</span>
+    <span class="s1">s_mean = np.mean(s)  </span><span class="s2"># np.sum(s)/float(N)</span>
+    <span class="s1">v_mean = np.mean(v)  </span><span class="s2"># np.sum(v)/float(N)</span>
+    <span class="s1">color_feature.extend([h_mean</span><span class="s0">, </span><span class="s1">s_mean</span><span class="s0">, </span><span class="s1">v_mean])</span>
+    <span class="s2"># The second central moment - standard deviation</span>
+    <span class="s1">h_std = np.std(h)  </span><span class="s2"># np.sqrt(np.mean(abs(h - h.mean())**2))</span>
+    <span class="s1">s_std = np.std(s)  </span><span class="s2"># np.sqrt(np.mean(abs(s - s.mean())**2))</span>
+    <span class="s1">v_std = np.std(v)  </span><span class="s2"># np.sqrt(np.mean(abs(v - v.mean())**2))</span>
+    <span class="s1">color_feature.extend([h_std</span><span class="s0">, </span><span class="s1">s_std</span><span class="s0">, </span><span class="s1">v_std])</span>
+    <span class="s2"># The third central moment - the third root of the skewness</span>
+    <span class="s1">h_skewness = np.mean(abs(h - h.mean())**</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">s_skewness = np.mean(abs(s - s.mean())**</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">v_skewness = np.mean(abs(v - v.mean())**</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">h_thirdMoment = h_skewness**(</span><span class="s3">1.</span><span class="s1">/</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">s_thirdMoment = s_skewness**(</span><span class="s3">1.</span><span class="s1">/</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">v_thirdMoment = v_skewness**(</span><span class="s3">1.</span><span class="s1">/</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">color_feature.extend([h_thirdMoment</span><span class="s0">, </span><span class="s1">s_thirdMoment</span><span class="s0">, </span><span class="s1">v_thirdMoment])</span>
+    <span class="s0">return </span><span class="s1">color_feature</span>
+
+<span class="s1">print(color_moments(</span><span class="s4">'Key_slice_examples/000001_03_01_088.png'</span><span class="s1">))</span></pre>
+</body>
+</html>

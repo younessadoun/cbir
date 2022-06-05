@@ -1,0 +1,195 @@
+<html>
+<head>
+<title>App.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6a8759;}
+.s3 { color: #6897bb;}
+.s4 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+App.py</font>
+</center></td></tr></table>
+<pre><span class="s0">from </span><span class="s1">tkinter </span><span class="s0">import </span><span class="s1">*</span>
+<span class="s0">import </span><span class="s1">tkinter </span><span class="s0">as </span><span class="s1">tk</span>
+<span class="s0">from </span><span class="s1">PIL </span><span class="s0">import </span><span class="s1">Image</span><span class="s0">,</span><span class="s1">ImageTk</span>
+<span class="s0">import </span><span class="s1">sys</span>
+<span class="s0">from </span><span class="s1">tkinter </span><span class="s0">import </span><span class="s1">messagebox</span>
+<span class="s0">from </span><span class="s1">tkinter </span><span class="s0">import </span><span class="s1">filedialog</span>
+<span class="s0">import </span><span class="s1">warnings</span>
+<span class="s1">warnings.filterwarnings(</span><span class="s2">&quot;ignore&quot;</span><span class="s0">, </span><span class="s1">category=DeprecationWarning)</span>
+<span class="s0">import </span><span class="s1">search</span>
+
+<span class="s1">qu=</span><span class="s0">None</span>
+
+<span class="s0">class </span><span class="s1">index:</span>
+    <span class="s1">n = </span><span class="s0">None</span>
+    <span class="s1">c = </span><span class="s0">None</span>
+    <span class="s1">c2= </span><span class="s0">None</span>
+    <span class="s1">s = </span><span class="s0">None</span>
+    <span class="s1">t = </span><span class="s0">None</span>
+    <span class="s1">p = </span><span class="s0">None</span>
+    <span class="s1">d = </span><span class="s0">None</span>
+
+<span class="s0">def </span><span class="s1">command3():</span>
+    <span class="s0">for </span><span class="s1">widgets </span><span class="s0">in </span><span class="s1">root.winfo_children():</span>
+        <span class="s1">widgets.destroy()</span>
+
+
+<span class="s0">def </span><span class="s1">log():</span>
+    <span class="s0">def </span><span class="s1">open_resulat(quer):</span>
+        <span class="s1">lbl.destroy()</span>
+        <span class="s1">but.destroy()</span>
+        <span class="s1">but2.destroy()</span>
+        <span class="s1">p2.destroy()</span>
+
+        <span class="s1">res=search.search(quer)</span>
+        <span class="s1">print(res)</span>
+        <span class="s1">p3=PanedWindow()</span>
+        <span class="s1">p3.pack(fill=BOTH</span><span class="s0">,</span><span class="s1">expand=</span><span class="s3">1</span><span class="s1">)</span>
+        <span class="s1">p3.place(width=</span><span class="s3">800</span><span class="s0">, </span><span class="s1">height=</span><span class="s3">500</span><span class="s1">)</span>
+        <span class="s1">p3.configure(background=</span><span class="s2">&quot;white&quot;</span><span class="s1">)</span>
+        <span class="s1">img01 =(Image.open(res[</span><span class="s3">0</span><span class="s1">]))</span>
+        <span class="s1">resized_image1= img01.resize((</span><span class="s3">200</span><span class="s0">,</span><span class="s3">200</span><span class="s1">)</span><span class="s0">, </span><span class="s1">Image.ANTIALIAS)</span>
+        <span class="s1">img1 = ImageTk.PhotoImage(resized_image1)</span>
+        <span class="s1">Label(p3</span><span class="s0">, </span><span class="s1">text=</span><span class="s2">&quot;image1&quot;</span><span class="s0">, </span><span class="s1">image=img1).place(x=</span><span class="s3">10</span><span class="s0">, </span><span class="s1">y=</span><span class="s3">10</span><span class="s0">, </span><span class="s1">width=</span><span class="s3">200</span><span class="s0">, </span><span class="s1">height=</span><span class="s3">200</span><span class="s1">)</span>
+       <span class="s4"># lb1.place(x=10, y=10)</span>
+       <span class="s4"># p3.add(lb1)</span>
+        <span class="s1">img02 = (Image.open(res[</span><span class="s3">1</span><span class="s1">]))</span>
+        <span class="s1">resized_image2 = img02.resize((</span><span class="s3">200</span><span class="s0">, </span><span class="s3">200</span><span class="s1">)</span><span class="s0">, </span><span class="s1">Image.ANTIALIAS)</span>
+        <span class="s1">img2 = ImageTk.PhotoImage(resized_image2)</span>
+        <span class="s1">Label(p3</span><span class="s0">, </span><span class="s1">text=</span><span class="s2">&quot;image2&quot;</span><span class="s0">,</span><span class="s1">image=img2).place(x=</span><span class="s3">10</span><span class="s0">, </span><span class="s1">y=</span><span class="s3">220</span><span class="s0">, </span><span class="s1">width=</span><span class="s3">200</span><span class="s0">, </span><span class="s1">height=</span><span class="s3">200</span><span class="s1">)</span>
+        <span class="s4">#lb2.place(x=140, y=20, width=100, height=100)</span>
+        <span class="s4">#p3.add(lb2)</span>
+        <span class="s1">img03 = (Image.open(res[</span><span class="s3">2</span><span class="s1">]))</span>
+        <span class="s1">resized_image3 = img03.resize((</span><span class="s3">200</span><span class="s0">, </span><span class="s3">200</span><span class="s1">)</span><span class="s0">, </span><span class="s1">Image.ANTIALIAS)</span>
+        <span class="s1">img3 = ImageTk.PhotoImage(resized_image3)</span>
+        <span class="s1">Label(p3</span><span class="s0">, </span><span class="s1">text=</span><span class="s2">&quot;image3&quot;</span><span class="s0">,</span><span class="s1">image=img3).place(x=</span><span class="s3">220</span><span class="s0">, </span><span class="s1">y=</span><span class="s3">10</span><span class="s0">, </span><span class="s1">width=</span><span class="s3">200</span><span class="s0">, </span><span class="s1">height=</span><span class="s3">200</span><span class="s1">)</span>
+        <span class="s4">#lb3.place(x=20, y=140, width=100, height=100)</span>
+        <span class="s4">#p3.add(lb3)</span>
+        <span class="s1">img04 = (Image.open(res[</span><span class="s3">3</span><span class="s1">]))</span>
+        <span class="s1">resized_image4 = img04.resize((</span><span class="s3">200</span><span class="s0">, </span><span class="s3">200</span><span class="s1">)</span><span class="s0">, </span><span class="s1">Image.ANTIALIAS)</span>
+        <span class="s1">img4 = ImageTk.PhotoImage(resized_image4)</span>
+        <span class="s1">Label(p3</span><span class="s0">, </span><span class="s1">text=</span><span class="s2">&quot;image4&quot;</span><span class="s0">,</span><span class="s1">image=img4).place(x=</span><span class="s3">220</span><span class="s0">, </span><span class="s1">y=</span><span class="s3">220</span><span class="s0">, </span><span class="s1">width=</span><span class="s3">200</span><span class="s0">, </span><span class="s1">height=</span><span class="s3">200</span><span class="s1">)</span>
+        <span class="s4">#lb4.place(x=140, y=140, width=100, height=100)</span>
+        <span class="s4">#p3.add(lb4)</span>
+        <span class="s1">img05 = (Image.open(res[</span><span class="s3">4</span><span class="s1">]))</span>
+        <span class="s1">resized_image5 = img05.resize((</span><span class="s3">200</span><span class="s0">, </span><span class="s3">200</span><span class="s1">)</span><span class="s0">, </span><span class="s1">Image.ANTIALIAS)</span>
+        <span class="s1">img5 = ImageTk.PhotoImage(resized_image5)</span>
+        <span class="s1">Label(p3</span><span class="s0">, </span><span class="s1">text=</span><span class="s2">&quot;image5&quot;</span><span class="s0">, </span><span class="s1">image=img5).place(x=</span><span class="s3">430</span><span class="s0">, </span><span class="s1">y=</span><span class="s3">10</span><span class="s0">, </span><span class="s1">width=</span><span class="s3">200</span><span class="s0">, </span><span class="s1">height=</span><span class="s3">200</span><span class="s1">)</span>
+        <span class="s4">#lb1.pack()</span>
+        <span class="s4">#lb2.pack()</span>
+        <span class="s4">#lb3.pack()</span>
+        <span class="s4">#lb4.pack()</span>
+
+        <span class="s1">p3.mainloop()</span>
+    <span class="s0">def </span><span class="s1">openfile1():</span>
+        <span class="s1">print(</span><span class="s2">&quot;openfile1()&quot;</span><span class="s1">)</span>
+        <span class="s1">filpath = filedialog.askopenfilename(initialdir=</span><span class="s2">'/home/amalek/mimoire/ '</span><span class="s1">)</span>
+        <span class="s1">img0 = Image.open(filpath)</span>
+        <span class="s1">img = img0.resize((</span><span class="s3">200</span><span class="s0">, </span><span class="s3">200</span><span class="s1">)</span><span class="s0">, </span><span class="s1">Image.ANTIALIAS)</span>
+        <span class="s0">global </span><span class="s1">qu</span>
+        <span class="s1">qu=filpath</span>
+        <span class="s1">img = ImageTk.PhotoImage(img)</span>
+        <span class="s1">lbl.configure(image=img)</span>
+        <span class="s1">lbl.image = img</span>
+    <span class="s0">if </span><span class="s1">enty1.get()==</span><span class="s2">&quot;&quot;</span><span class="s0">and </span><span class="s1">entry2.get()==</span><span class="s2">&quot;&quot;</span><span class="s1">:</span>
+        <span class="s1">command3()</span>
+        <span class="s1">p2=PanedWindow()</span>
+        <span class="s1">p2.pack(fill=BOTH</span><span class="s0">,</span><span class="s1">expand=</span><span class="s3">1</span><span class="s1">)</span>
+        <span class="s1">p2.place(width=</span><span class="s3">720</span><span class="s0">, </span><span class="s1">height=</span><span class="s3">500</span><span class="s1">)</span>
+        <span class="s1">p2.configure(background=</span><span class="s2">&quot;white&quot;</span><span class="s1">)</span>
+        <span class="s1">lbl = Label(root</span><span class="s0">, </span><span class="s1">bg=</span><span class="s2">&quot;red&quot;</span><span class="s1">)</span>
+        <span class="s1">lbl.place(x=</span><span class="s3">20</span><span class="s0">,</span><span class="s1">y=</span><span class="s3">50</span><span class="s0">,</span><span class="s1">width=</span><span class="s3">200</span><span class="s0">,</span><span class="s1">height=</span><span class="s3">200</span><span class="s1">)</span>
+        <span class="s1">p2.add(lbl)</span>
+        <span class="s1">but = Button(root</span><span class="s0">, </span><span class="s1">text=</span><span class="s2">&quot;open&quot;</span><span class="s0">,</span><span class="s1">command=openfile1)</span>
+        <span class="s1">but.place(x=</span><span class="s3">20</span><span class="s0">,</span><span class="s1">y=</span><span class="s3">20</span><span class="s1">)</span>
+        <span class="s1">p2.add(but)</span>
+        <span class="s1">but2 = Button(root</span><span class="s0">,</span><span class="s1">text=</span><span class="s2">&quot;resultat&quot;</span><span class="s0">,</span><span class="s1">command=</span><span class="s0">lambda</span><span class="s1">: open_resulat(qu))</span>
+        <span class="s1">but2.place(x=</span><span class="s3">20</span><span class="s0">,</span><span class="s1">y=</span><span class="s3">100</span><span class="s1">)</span>
+        <span class="s1">p2.add(but2)</span>
+        <span class="s1">lbl.pack()</span>
+        <span class="s1">but.pack()</span>
+        <span class="s1">but2.pack()</span>
+        <span class="s1">p2.mainloop()</span>
+
+
+
+
+        <span class="s1">print(</span><span class="s2">&quot;log after openfile1&quot;</span><span class="s1">)</span>
+<span class="s4">#        window = Tk()</span>
+<span class="s4">#        window.title(&quot;my application &quot;)</span>
+<span class="s4">#       window.geometry('500x500+100+100')</span>
+        <span class="s4"># window.minsize(500,500)</span>
+
+        <span class="s4"># window.config(background=&quot;#41B77F&quot;)</span>
+<span class="s4">#        frame = Frame(window, background=&quot;#41B77F&quot;)</span>
+<span class="s4">#        frame.place(x=20, y=100, width=400, height=250)</span>
+        <span class="s4"># label_title= Label (frame,text='welcom to my application ')</span>
+        <span class="s4"># label_title.pack()</span>
+        <span class="s4"># frame.pack()</span>
+<span class="s4">#        lbl = Label(frame, bg=&quot;red&quot;)</span>
+<span class="s4">#        lbl.place(x=20, y=20, width=200, height=200)</span>
+        <span class="s4"># lbl.pack()</span>
+<span class="s4">#        button = Button(frame, text=&quot;open&quot;, command=openfile1).place(x=270, y=50)</span>
+        <span class="s4"># button.pack()</span>
+<span class="s4">#        button2 = Button(frame, text=&quot;resultat&quot;).place(x=270, y=80)</span>
+
+        <span class="s4"># button2.pack()</span>
+        <span class="s1">print(</span><span class="s2">&quot;end&quot;</span><span class="s1">)</span>
+        <span class="s4">#window.mainloop()</span>
+    <span class="s4">#sys.exit()</span>
+<span class="s0">def </span><span class="s1">command1(event):</span>
+    <span class="s0">if </span><span class="s1">enty1.get()== </span><span class="s2">&quot;admin&quot; </span><span class="s0">and </span><span class="s1">entry2.get()== </span><span class="s2">&quot;password&quot;</span><span class="s1">:</span>
+        <span class="s1">root.deiconify()</span>
+        <span class="s1">top.destroy()</span>
+<span class="s0">def </span><span class="s1">command2():</span>
+    <span class="s1">root.destroy()</span>
+    <span class="s1">sys.exit()</span>
+
+
+<span class="s1">root=Tk()</span>
+
+<span class="s1">root.title(</span><span class="s2">&quot;LOGIN SCREEN&quot;</span><span class="s1">)</span>
+<span class="s1">root.geometry(</span><span class="s2">'720x500'</span><span class="s1">)</span>
+<span class="s4">#root.configure(background='white')</span>
+<span class="s1">p1=PanedWindow()</span>
+<span class="s1">p1.pack(fill=BOTH</span><span class="s0">,</span><span class="s1">expand=</span><span class="s3">1</span><span class="s1">)</span>
+<span class="s1">p1.place(width=</span><span class="s3">720</span><span class="s0">,</span><span class="s1">height=</span><span class="s3">500</span><span class="s1">)</span>
+<span class="s1">p1.configure(background=</span><span class="s2">&quot;white&quot;</span><span class="s1">)</span>
+
+<span class="s1">lbl1=Label(root</span><span class="s0">,</span><span class="s1">text=</span><span class="s2">&quot;Username&quot;</span><span class="s0">,</span><span class="s1">font=(</span><span class="s2">'Helvetica'</span><span class="s0">,</span><span class="s3">10</span><span class="s1">))</span>
+<span class="s1">enty1=Entry(root)</span>
+<span class="s1">p1.add(lbl1)</span>
+<span class="s1">lbl2=Label(root</span><span class="s0">,</span><span class="s1">text=</span><span class="s2">&quot;Password&quot;</span><span class="s0">,</span><span class="s1">font=(</span><span class="s2">'Helvetica'</span><span class="s0">,</span><span class="s3">10</span><span class="s1">))</span>
+<span class="s1">entry2=Entry(root</span><span class="s0">,</span><span class="s1">show=</span><span class="s2">&quot;*&quot;</span><span class="s1">)</span>
+<span class="s1">p1.add(lbl2)</span>
+<span class="s1">button2=Button(root</span><span class="s0">,</span><span class="s1">text=</span><span class="s2">&quot;cencel&quot;</span><span class="s0">,</span><span class="s1">command=</span><span class="s0">lambda</span><span class="s1">:command2())</span>
+<span class="s1">p1.add(button2)</span>
+<span class="s1">button=Button(root</span><span class="s0">,</span><span class="s1">text=</span><span class="s2">&quot;LOGIN&quot;</span><span class="s0">,</span><span class="s1">command=log)</span>
+<span class="s1">p1.add(button)</span>
+<span class="s4">#entry2.bind('&lt;Return&gt;',command1)</span>
+<span class="s1">lbl3=Label(root</span><span class="s0">,</span><span class="s1">text=</span><span class="s2">&quot;login screen 2022&quot;</span><span class="s0">,</span><span class="s1">font=(</span><span class="s2">'Arial'</span><span class="s0">,</span><span class="s3">9</span><span class="s1">))</span>
+<span class="s1">p1.add(lbl3)</span>
+<span class="s1">lbl1.pack()</span>
+<span class="s1">enty1.pack()</span>
+<span class="s1">lbl2.pack()</span>
+<span class="s1">entry2.pack()</span>
+<span class="s1">button2.pack()</span>
+<span class="s1">button.pack()</span>
+<span class="s1">lbl3.pack()</span>
+
+
+<span class="s1">root.mainloop()</span>
+
+
+
+</pre>
+</body>
+</html>

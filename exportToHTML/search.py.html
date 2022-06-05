@@ -1,0 +1,233 @@
+<html>
+<head>
+<title>search.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #808080;}
+.s3 { color: #6897bb;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+search.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">string</span>
+
+<span class="s0">import </span><span class="s1">cv2 </span><span class="s0">as </span><span class="s1">cv</span>
+<span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np</span>
+<span class="s0">import </span><span class="s1">skimage</span>
+<span class="s0">from </span><span class="s1">matplotlib </span><span class="s0">import </span><span class="s1">pyplot </span><span class="s0">as </span><span class="s1">plt</span>
+<span class="s0">from </span><span class="s1">skimage </span><span class="s0">import </span><span class="s1">metrics</span>
+<span class="s0">from </span><span class="s1">skimage </span><span class="s0">import </span><span class="s1">io</span>
+<span class="s2">#from google.colab.patches import cv2_imshow</span>
+<span class="s0">import </span><span class="s1">skimage.feature </span><span class="s0">as </span><span class="s1">feature</span>
+<span class="s0">import </span><span class="s1">pickle</span>
+<span class="s0">import </span><span class="s1">os</span>
+<span class="s0">from </span><span class="s1">scipy.spatial </span><span class="s0">import </span><span class="s1">distance</span>
+
+
+
+
+<span class="s0">class </span><span class="s1">index:</span>
+    <span class="s1">n = </span><span class="s0">None</span>
+    <span class="s1">c = </span><span class="s0">None</span>
+    <span class="s1">c2= </span><span class="s0">None</span>
+    <span class="s1">s = </span><span class="s0">None</span>
+    <span class="s1">t = </span><span class="s0">None</span>
+    <span class="s1">p = </span><span class="s0">None</span>
+    <span class="s1">d = </span><span class="s0">None</span>
+
+<span class="s0">def </span><span class="s1">color_moments(filename):</span>
+    <span class="s1">img = cv.imread(filename)</span>
+    <span class="s0">if </span><span class="s1">img </span><span class="s0">is None</span><span class="s1">:</span>
+        <span class="s0">return</span>
+    <span class="s2"># Convert BGR to HSV colorspace</span>
+    <span class="s1">hsv = cv.cvtColor(img</span><span class="s0">, </span><span class="s1">cv.COLOR_BGR2HSV)</span>
+    <span class="s2"># Split the channels - h,s,v</span>
+    <span class="s1">h</span><span class="s0">, </span><span class="s1">s</span><span class="s0">, </span><span class="s1">v = cv.split(hsv)</span>
+    <span class="s2"># Initialize the color feature</span>
+    <span class="s1">color_feature = []</span>
+    <span class="s2"># N = h.shape[0] * h.shape[1]</span>
+    <span class="s2"># The first central moment - average</span>
+    <span class="s1">h_mean = np.mean(h)  </span><span class="s2"># np.sum(h)/float(N)</span>
+    <span class="s1">s_mean = np.mean(s)  </span><span class="s2"># np.sum(s)/float(N)</span>
+    <span class="s1">v_mean = np.mean(v)  </span><span class="s2"># np.sum(v)/float(N)</span>
+    <span class="s2">#color_feature.extend([h_mean, s_mean, v_mean])</span>
+    <span class="s2"># The second central moment - standard deviation</span>
+    <span class="s1">h_std = np.std(h)  </span><span class="s2"># np.sqrt(np.mean(abs(h - h.mean())**2))</span>
+    <span class="s1">s_std = np.std(s)  </span><span class="s2"># np.sqrt(np.mean(abs(s - s.mean())**2))</span>
+    <span class="s1">v_std = np.std(v)  </span><span class="s2"># np.sqrt(np.mean(abs(v - v.mean())**2))</span>
+    <span class="s2">#color_feature.extend([h_std, s_std, v_std])</span>
+    <span class="s2"># The third central moment - the third root of the skewness</span>
+    <span class="s1">h_skewness = np.mean(abs(h - h.mean())**</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">s_skewness = np.mean(abs(s - s.mean())**</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">v_skewness = np.mean(abs(v - v.mean())**</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">h_thirdMoment = h_skewness**(</span><span class="s3">1.</span><span class="s1">/</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">s_thirdMoment = s_skewness**(</span><span class="s3">1.</span><span class="s1">/</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">v_thirdMoment = v_skewness**(</span><span class="s3">1.</span><span class="s1">/</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s2">#color_feature.extend([h_thirdMoment, s_thirdMoment, v_thirdMoment])</span>
+    <span class="s1">color_feature=[h_mean</span><span class="s0">, </span><span class="s1">s_mean</span><span class="s0">, </span><span class="s1">v_mean</span><span class="s0">, </span><span class="s1">h_std</span><span class="s0">, </span><span class="s1">s_std</span><span class="s0">, </span><span class="s1">v_std</span><span class="s0">, </span><span class="s1">h_thirdMoment</span><span class="s0">, </span><span class="s1">s_thirdMoment</span><span class="s0">, </span><span class="s1">v_thirdMoment]</span>
+    <span class="s0">return </span><span class="s1">color_feature</span>
+
+<span class="s0">def </span><span class="s1">extract_features(name):</span>
+    <span class="s1">print(name)</span>
+
+
+    <span class="s1">img=cv.imread(name)</span>
+    <span class="s2">#print(img)</span>
+
+    <span class="s2"># Calculate histogram without mask</span>
+
+
+    <span class="s1">hist1 = cv.calcHist([img]</span><span class="s0">, </span><span class="s1">[</span><span class="s3">0</span><span class="s1">]</span><span class="s0">, None, </span><span class="s1">[</span><span class="s3">256</span><span class="s1">]</span><span class="s0">, </span><span class="s1">[</span><span class="s3">0</span><span class="s0">, </span><span class="s3">256</span><span class="s1">])</span>
+
+    <span class="s2">#print(hist1)</span>
+    <span class="s1">colmom = color_moments(name)</span>
+
+    <span class="s1">lower = </span><span class="s3">0.66 </span><span class="s1">* np.mean(img)</span>
+    <span class="s1">upper = </span><span class="s3">1.33 </span><span class="s1">* np.mean(img)</span>
+    <span class="s1">edges = cv.Canny(img</span><span class="s0">, </span><span class="s1">lower</span><span class="s0">, </span><span class="s1">upper)</span>
+
+    <span class="s2"># print(edges)</span>
+
+    <span class="s1">gray = cv.cvtColor(img</span><span class="s0">, </span><span class="s1">cv.COLOR_BGR2GRAY)</span>
+
+    <span class="s1">graycom = feature.graycomatrix(gray</span><span class="s0">, </span><span class="s1">[</span><span class="s3">1</span><span class="s1">]</span><span class="s0">, </span><span class="s1">[</span><span class="s3">0</span><span class="s0">, </span><span class="s1">np.pi / </span><span class="s3">4</span><span class="s0">, </span><span class="s1">np.pi / </span><span class="s3">2</span><span class="s0">, </span><span class="s3">3 </span><span class="s1">* np.pi / </span><span class="s3">4</span><span class="s1">]</span><span class="s0">, </span><span class="s1">levels=</span><span class="s3">256</span><span class="s1">)</span>
+
+  <span class="s2">#  contrast = feature.graycoprops(graycom, 'contrast')</span>
+  <span class="s2">#  dissimilarity = feature.graycoprops(graycom, 'dissimilarity')</span>
+  <span class="s2">#  homogeneity = feature.graycoprops(graycom, 'homogeneity')</span>
+  <span class="s2">#  energy = feature.graycoprops(graycom, 'energy')</span>
+  <span class="s2">#  correlation = feature.graycoprops(graycom, 'correlation')</span>
+  <span class="s2">#  ASM = feature.graycoprops(graycom, 'ASM')</span>
+
+    <span class="s1">gray = cv.cvtColor(img</span><span class="s0">, </span><span class="s1">cv.COLOR_BGR2GRAY)</span>
+    <span class="s1">sift = cv.SIFT_create()</span>
+
+    <span class="s1">keypoints_1</span><span class="s0">, </span><span class="s1">descriptors_1 = sift.detectAndCompute(gray</span><span class="s0">, None</span><span class="s1">)</span>
+    <span class="s2">#kp = sift.detect(gray, None)</span>
+
+
+
+    <span class="s1">feat=index</span>
+    <span class="s1">feat.n = name</span>
+    <span class="s1">feat.c = hist1</span>
+    <span class="s1">feat.c2= colmom</span>
+    <span class="s1">feat.s = edges</span>
+    <span class="s1">feat.t = graycom</span>
+    <span class="s1">feat.p = keypoints_1</span>
+    <span class="s1">feat.d = descriptors_1</span>
+
+    <span class="s0">return </span><span class="s1">feat</span>
+
+<span class="s0">def </span><span class="s1">search(quer):</span>
+    <span class="s1">objects = []</span>
+    <span class="s1">order = []</span>
+    <span class="s2">#quer='images/test/1.2.826.0.1.3680043.8.498.11678170878548215953866689093584664340-c.png'</span>
+    <span class="s1">querf=extract_features(quer)</span>
+    <span class="s1">qc=querf.c</span>
+    <span class="s1">qc2=querf.c2</span>
+    <span class="s1">qs=querf.s</span>
+    <span class="s1">qt=querf.t</span>
+    <span class="s1">qkp=querf.p</span>
+    <span class="s1">qd=querf.d</span>
+    <span class="s0">with </span><span class="s1">(open(</span><span class="s4">&quot;variableStoringFile.dat&quot;</span><span class="s0">, </span><span class="s4">&quot;rb&quot;</span><span class="s1">)) </span><span class="s0">as </span><span class="s1">openfile:</span>
+        <span class="s0">while True</span><span class="s1">:</span>
+            <span class="s0">try</span><span class="s1">:</span>
+                <span class="s1">tem=pickle.load(openfile)</span>
+
+                <span class="s1">cd = metrics.hausdorff_distance(qc</span><span class="s0">, </span><span class="s1">tem.c)</span>
+
+                <span class="s2">#print(qc2)</span>
+                <span class="s2">#print(tem.c2)</span>
+                <span class="s1">cd2=distance.euclidean(qc2</span><span class="s0">,</span><span class="s1">tem.c2)</span>
+                <span class="s2">#cd2 = metrics.hausdorff_distance(qc, tem.c2)</span>
+
+                <span class="s2">#sd = metrics.hausdorff_distance(qs, tem.s)</span>
+                <span class="s1">sd=cv.matchShapes(qs</span><span class="s0">,</span><span class="s1">tem.s</span><span class="s0">,</span><span class="s3">1</span><span class="s0">,</span><span class="s3">0.0</span><span class="s1">)*</span><span class="s3">10000</span>
+
+                <span class="s1">td = metrics.hausdorff_distance(qt</span><span class="s0">, </span><span class="s1">tem.t)</span>
+
+                <span class="s1">imgc=cv.imread(tem.n)</span>
+                <span class="s1">gray = cv.cvtColor(imgc</span><span class="s0">, </span><span class="s1">cv.COLOR_BGR2GRAY)</span>
+
+                <span class="s1">sift = cv.SIFT_create()</span>
+
+                <span class="s1">keypoints_1</span><span class="s0">, </span><span class="s1">descriptors_1 = sift.detectAndCompute(gray</span><span class="s0">, None</span><span class="s1">)</span>
+                <span class="s2">#kpc = sift.detect(gray, None)</span>
+                <span class="s1">bf = cv.BFMatcher(cv.NORM_L1</span><span class="s0">, </span><span class="s1">crossCheck=</span><span class="s0">True</span><span class="s1">)</span>
+                <span class="s1">matches = bf.match(descriptors_1</span><span class="s0">, </span><span class="s1">qd)</span>
+                <span class="s1">kpd=</span><span class="s3">0</span>
+                <span class="s0">if </span><span class="s1">len(descriptors_1)&lt;=len(qd) :</span>
+                    <span class="s1">kpd=</span><span class="s3">100</span><span class="s1">-((len(matches)*</span><span class="s3">100</span><span class="s1">)/len(descriptors_1))</span>
+                <span class="s0">else</span><span class="s1">:</span>
+                    <span class="s1">kpd =</span><span class="s3">100</span><span class="s1">-( (len(matches) * </span><span class="s3">100</span><span class="s1">) / len(qd))</span>
+             <span class="s2">#   print(len(descriptors_1))</span>
+             <span class="s2">#   print(len(qd))</span>
+             <span class="s2">#   print(len(matches))</span>
+             <span class="s2">#   matches = sorted(matches, key=lambda x: x.distance)</span>
+                <span class="s2">#kpd = metrics.hausdorff_distance(qkp, tem.p)</span>
+
+                <span class="s1">ttd = cd*</span><span class="s3">0.5 </span><span class="s1">+ cd2*</span><span class="s3">0.5 </span><span class="s1">+ sd*</span><span class="s3">1 </span><span class="s1">+ td*</span><span class="s3">0.1 </span><span class="s1">+ kpd*</span><span class="s3">10</span>
+              <span class="s2">#  ttd = sd</span>
+
+                <span class="s1">o=(ttd</span><span class="s0">,</span><span class="s1">tem.n)</span>
+
+                <span class="s1">order.append(o)</span>
+
+                <span class="s1">objects.append(tem)</span>
+               <span class="s2"># print(objects)</span>
+            <span class="s0">except </span><span class="s1">EOFError:</span>
+                <span class="s0">break</span>
+        <span class="s1">print(</span><span class="s4">&quot;end&quot;</span><span class="s1">)</span>
+
+
+    <span class="s1">order.sort()</span>
+    <span class="s1">resultlist=[</span><span class="s0">None,None,None,None,None</span><span class="s1">]</span>
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(</span><span class="s3">5</span><span class="s1">):</span>
+        <span class="s1">resultlist[i]=order[i][</span><span class="s3">1</span><span class="s1">]</span>
+
+    <span class="s0">return </span><span class="s1">resultlist</span>
+
+<span class="s2">#w = 10</span>
+<span class="s2">#h = 10</span>
+<span class="s2">#fig = plt.figure(figsize=(8, 8))</span>
+<span class="s2">#columns = 5</span>
+<span class="s2">#rows = 3</span>
+<span class="s2">#img = cv.imread(quer)</span>
+<span class="s2">#fig.add_subplot(rows, columns, 3)</span>
+<span class="s2">#plt.imshow(img)</span>
+<span class="s2">#for i in range(1, columns*rows-4 ):</span>
+    <span class="s2">#    img = cv.imread(order[i][1])</span>
+    <span class="s2">#    fig.add_subplot(rows, columns, i+5)</span>
+<span class="s2">#    plt.imshow(img)</span>
+<span class="s2">#plt.show()</span>
+<span class="s2">#img = cv.imread(quer)</span>
+<span class="s2">#fig.add_subplot(rows, columns, 3)</span>
+<span class="s2">#lower = 0.66 * np.mean(img)</span>
+<span class="s2">#upper = 1.33 * np.mean(img)</span>
+<span class="s2">#edges = cv.Canny(img, lower, upper)</span>
+<span class="s2">#plt.imshow(edges)</span>
+<span class="s2">#for i in range(1, columns*rows-4 ):</span>
+<span class="s2">#    img = cv.imread(order[i][1])</span>
+<span class="s2">#    lower = 0.66 * np.mean(img)</span>
+<span class="s2">#    upper = 1.33 * np.mean(img)</span>
+<span class="s2">#    edges = cv.Canny(img, lower, upper)</span>
+<span class="s2">#    fig.add_subplot(rows, columns, i+5)</span>
+<span class="s2">#    plt.imshow(edges)</span>
+<span class="s2">#plt.show()</span>
+
+
+
+<span class="s2">#print(len(objects))</span>
+
+
+
+<span class="s2">#print(metrics.hausdorff_distance(edges, edges2))</span></pre>
+</body>
+</html>

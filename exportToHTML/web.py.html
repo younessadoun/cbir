@@ -1,0 +1,99 @@
+<html>
+<head>
+<title>web.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6a8759;}
+.s3 { color: #6897bb;}
+.s4 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+web.py</font>
+</center></td></tr></table>
+<pre><span class="s0">from </span><span class="s1">flask </span><span class="s0">import </span><span class="s1">Flask</span><span class="s0">, </span><span class="s1">flash</span><span class="s0">, </span><span class="s1">request</span><span class="s0">, </span><span class="s1">redirect</span><span class="s0">, </span><span class="s1">url_for</span><span class="s0">, </span><span class="s1">render_template</span>
+<span class="s0">import </span><span class="s1">urllib.request</span>
+<span class="s0">import </span><span class="s1">os</span>
+<span class="s0">from </span><span class="s1">werkzeug.utils </span><span class="s0">import </span><span class="s1">secure_filename</span>
+<span class="s0">import </span><span class="s1">search</span>
+
+<span class="s1">qu=</span><span class="s0">None</span>
+
+<span class="s0">class </span><span class="s1">index:</span>
+    <span class="s1">n = </span><span class="s0">None</span>
+    <span class="s1">c = </span><span class="s0">None</span>
+    <span class="s1">c2= </span><span class="s0">None</span>
+    <span class="s1">s = </span><span class="s0">None</span>
+    <span class="s1">t = </span><span class="s0">None</span>
+    <span class="s1">p = </span><span class="s0">None</span>
+    <span class="s1">d = </span><span class="s0">None</span>
+
+<span class="s1">app = Flask(__name__)</span>
+
+<span class="s1">UPLOAD_FOLDER = </span><span class="s2">'static/uploads/'</span>
+
+<span class="s1">app.secret_key = </span><span class="s2">&quot;secret key&quot;</span>
+<span class="s1">app.config[</span><span class="s2">'UPLOAD_FOLDER'</span><span class="s1">] = UPLOAD_FOLDER</span>
+<span class="s1">app.config[</span><span class="s2">'MAX_CONTENT_LENGTH'</span><span class="s1">] = </span><span class="s3">16 </span><span class="s1">* </span><span class="s3">1024 </span><span class="s1">* </span><span class="s3">1024</span>
+
+<span class="s1">ALLOWED_EXTENSIONS = set([</span><span class="s2">'png'</span><span class="s0">, </span><span class="s2">'jpg'</span><span class="s0">, </span><span class="s2">'jpeg'</span><span class="s0">, </span><span class="s2">'gif'</span><span class="s1">])</span>
+
+
+<span class="s0">def </span><span class="s1">allowed_file(filename):</span>
+    <span class="s0">return </span><span class="s2">'.' </span><span class="s0">in </span><span class="s1">filename </span><span class="s0">and </span><span class="s1">filename.rsplit(</span><span class="s2">'.'</span><span class="s0">, </span><span class="s3">1</span><span class="s1">)[</span><span class="s3">1</span><span class="s1">].lower() </span><span class="s0">in </span><span class="s1">ALLOWED_EXTENSIONS</span>
+
+
+<span class="s1">@app.route(</span><span class="s2">'/'</span><span class="s1">)</span>
+<span class="s0">def </span><span class="s1">home():</span>
+    <span class="s0">return </span><span class="s1">render_template(</span><span class="s2">'index.html'</span><span class="s1">)</span>
+
+
+<span class="s1">@app.route(</span><span class="s2">'/'</span><span class="s0">, </span><span class="s1">methods=[</span><span class="s2">'POST'</span><span class="s1">])</span>
+<span class="s0">def </span><span class="s1">upload_image():</span>
+    <span class="s0">if </span><span class="s2">'file' </span><span class="s0">not in </span><span class="s1">request.files:</span>
+        <span class="s1">flash(</span><span class="s2">'No file part'</span><span class="s1">)</span>
+        <span class="s0">return </span><span class="s1">redirect(request.url)</span>
+    <span class="s1">file = request.files[</span><span class="s2">'file'</span><span class="s1">]</span>
+    <span class="s0">if </span><span class="s1">file.filename == </span><span class="s2">''</span><span class="s1">:</span>
+        <span class="s1">flash(</span><span class="s2">'No image selected for uploading'</span><span class="s1">)</span>
+        <span class="s0">return </span><span class="s1">redirect(request.url)</span>
+    <span class="s0">if </span><span class="s1">file </span><span class="s0">and </span><span class="s1">allowed_file(file.filename):</span>
+        <span class="s1">filename = secure_filename(file.filename)</span>
+        <span class="s1">file.save(os.path.join(app.config[</span><span class="s2">'UPLOAD_FOLDER'</span><span class="s1">]</span><span class="s0">, </span><span class="s1">filename))</span>
+        <span class="s4"># print('upload_image filename: ' + filename)</span>
+        <span class="s1">flash(</span><span class="s2">'Image successfully uploaded and displayed below'</span><span class="s1">)</span>
+        <span class="s0">return </span><span class="s1">render_template(</span><span class="s2">'index.html'</span><span class="s0">, </span><span class="s1">filename=filename)</span>
+    <span class="s0">else</span><span class="s1">:</span>
+        <span class="s1">flash(</span><span class="s2">'Allowed image types are - png, jpg, jpeg, gif'</span><span class="s1">)</span>
+        <span class="s0">return </span><span class="s1">redirect(request.url)</span>
+
+
+<span class="s1">@app.route(</span><span class="s2">'/display/&lt;filename&gt;'</span><span class="s1">)</span>
+<span class="s0">def </span><span class="s1">display_image(filename):</span>
+    <span class="s1">print(</span><span class="s2">'search started'</span><span class="s1">)</span>
+    <span class="s1">res = search.search(UPLOAD_FOLDER + filename)</span>
+    <span class="s0">return </span><span class="s1">redirect(url_for(</span><span class="s2">'static'</span><span class="s0">,</span><span class="s1">filename=res[</span><span class="s3">2</span><span class="s1">]</span><span class="s0">, </span><span class="s1">code=</span><span class="s3">301</span><span class="s1">))</span>
+<span class="s4">#@app.route('/display/&lt;filename&gt;')</span>
+<span class="s4">#def display_image(filename):</span>
+<span class="s4">#    print('search started')</span>
+<span class="s4">#    res = search.search(UPLOAD_FOLDER + filename)</span>
+<span class="s4">#    print(res)</span>
+<span class="s4">#    return render_template('index.html', users=res)</span>
+    <span class="s4">#return redirect(url_for('static',filename=res, code=301))</span>
+
+<span class="s1">@app.route(</span><span class="s2">'/result'</span><span class="s1">)</span>
+<span class="s0">def </span><span class="s1">display_result(filename):</span>
+    <span class="s4">#print('search started')</span>
+    <span class="s4">#res = search.search(UPLOAD_FOLDER + filename)</span>
+    <span class="s4">#print(res)</span>
+    <span class="s0">return </span><span class="s1">redirect(url_for(</span><span class="s2">'static'</span><span class="s0">, </span><span class="s1">filename=</span><span class="s2">'uploads/' </span><span class="s1">+ filename)</span><span class="s0">, </span><span class="s1">code=</span><span class="s3">301</span><span class="s1">)</span>
+
+<span class="s0">if </span><span class="s1">__name__ == </span><span class="s2">&quot;__main__&quot;</span><span class="s1">:</span>
+    <span class="s1">app.run()</span></pre>
+</body>
+</html>

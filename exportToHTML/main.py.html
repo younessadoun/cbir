@@ -1,0 +1,157 @@
+<html>
+<head>
+<title>main.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #808080;}
+.s3 { color: #6897bb;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">cv2 </span><span class="s0">as </span><span class="s1">cv</span>
+<span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np</span>
+<span class="s0">from </span><span class="s1">matplotlib </span><span class="s0">import </span><span class="s1">pyplot </span><span class="s0">as </span><span class="s1">plt</span>
+<span class="s0">import </span><span class="s1">warnings</span>
+<span class="s0">def </span><span class="s1">noop(*args</span><span class="s0">, </span><span class="s1">**kargs): </span><span class="s0">pass</span>
+<span class="s1">warnings.warn = noop</span>
+<span class="s2">#with warnings.catch_warnings():</span>
+    <span class="s2">#warnings.simplefilter('ignore', category=DeprecationWarning)</span>
+<span class="s0">import </span><span class="s1">skimage</span>
+<span class="s0">from </span><span class="s1">skimage </span><span class="s0">import </span><span class="s1">metrics</span>
+<span class="s0">from </span><span class="s1">skimage </span><span class="s0">import </span><span class="s1">io</span>
+<span class="s0">import </span><span class="s1">skimage.feature </span><span class="s0">as </span><span class="s1">feature</span>
+<span class="s0">import </span><span class="s1">pickle</span>
+<span class="s0">import </span><span class="s1">os</span>
+
+
+
+<span class="s0">class </span><span class="s1">index:</span>
+    <span class="s0">def </span><span class="s1">__init__(self</span><span class="s0">, </span><span class="s1">name</span><span class="s0">, </span><span class="s1">color</span><span class="s0">, </span><span class="s1">color2</span><span class="s0">, </span><span class="s1">shape</span><span class="s0">, </span><span class="s1">texture</span><span class="s0">, </span><span class="s1">point):</span>
+        <span class="s1">self.n = name</span>
+        <span class="s1">self.c = color</span>
+        <span class="s1">self.c2 = color2</span>
+        <span class="s1">self.s = shape</span>
+        <span class="s1">self.t = texture</span>
+        <span class="s1">self.p = point</span>
+
+<span class="s0">def </span><span class="s1">color_moments(filename):</span>
+    <span class="s1">img = cv.imread(filename)</span>
+    <span class="s0">if </span><span class="s1">img </span><span class="s0">is None</span><span class="s1">:</span>
+        <span class="s0">return</span>
+    <span class="s2"># Convert BGR to HSV colorspace</span>
+    <span class="s1">hsv = cv.cvtColor(img</span><span class="s0">, </span><span class="s1">cv.COLOR_BGR2HSV)</span>
+    <span class="s2"># Split the channels - h,s,v</span>
+    <span class="s1">h</span><span class="s0">, </span><span class="s1">s</span><span class="s0">, </span><span class="s1">v = cv.split(hsv)</span>
+    <span class="s2"># Initialize the color feature</span>
+    <span class="s1">color_feature = []</span>
+    <span class="s2"># N = h.shape[0] * h.shape[1]</span>
+    <span class="s2"># The first central moment - average</span>
+    <span class="s1">h_mean = np.mean(h)  </span><span class="s2"># np.sum(h)/float(N)</span>
+    <span class="s1">s_mean = np.mean(s)  </span><span class="s2"># np.sum(s)/float(N)</span>
+    <span class="s1">v_mean = np.mean(v)  </span><span class="s2"># np.sum(v)/float(N)</span>
+    <span class="s2">#color_feature.extend([h_mean, s_mean, v_mean])</span>
+    <span class="s2"># The second central moment - standard deviation</span>
+    <span class="s1">h_std = np.std(h)  </span><span class="s2"># np.sqrt(np.mean(abs(h - h.mean())**2))</span>
+    <span class="s1">s_std = np.std(s)  </span><span class="s2"># np.sqrt(np.mean(abs(s - s.mean())**2))</span>
+    <span class="s1">v_std = np.std(v)  </span><span class="s2"># np.sqrt(np.mean(abs(v - v.mean())**2))</span>
+    <span class="s2">#color_feature.extend([h_std, s_std, v_std])</span>
+    <span class="s2"># The third central moment - the third root of the skewness</span>
+    <span class="s1">h_skewness = np.mean(abs(h - h.mean())**</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">s_skewness = np.mean(abs(s - s.mean())**</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">v_skewness = np.mean(abs(v - v.mean())**</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">h_thirdMoment = h_skewness**(</span><span class="s3">1.</span><span class="s1">/</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">s_thirdMoment = s_skewness**(</span><span class="s3">1.</span><span class="s1">/</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s1">v_thirdMoment = v_skewness**(</span><span class="s3">1.</span><span class="s1">/</span><span class="s3">3</span><span class="s1">)</span>
+    <span class="s2">#color_feature.extend([h_thirdMoment, s_thirdMoment, v_thirdMoment])</span>
+    <span class="s1">color_feature=[h_mean</span><span class="s0">, </span><span class="s1">s_mean</span><span class="s0">, </span><span class="s1">v_mean</span><span class="s0">, </span><span class="s1">h_std</span><span class="s0">, </span><span class="s1">s_std</span><span class="s0">, </span><span class="s1">v_std</span><span class="s0">, </span><span class="s1">h_thirdMoment</span><span class="s0">, </span><span class="s1">s_thirdMoment</span><span class="s0">, </span><span class="s1">v_thirdMoment]</span>
+    <span class="s0">return </span><span class="s1">color_feature</span>
+
+<span class="s0">def </span><span class="s1">create_index(name):</span>
+    <span class="s1">print(name)</span>
+
+
+
+    <span class="s1">img=cv.imread(name)</span>
+    <span class="s2">#print(img)</span>
+
+    <span class="s2"># Calculate histogram without mask</span>
+
+    <span class="s1">hist1 = cv.calcHist([img]</span><span class="s0">, </span><span class="s1">[</span><span class="s3">0</span><span class="s1">]</span><span class="s0">, None, </span><span class="s1">[</span><span class="s3">256</span><span class="s1">]</span><span class="s0">, </span><span class="s1">[</span><span class="s3">0</span><span class="s0">, </span><span class="s3">256</span><span class="s1">])</span>
+
+    <span class="s2">#print(hist1)</span>
+    <span class="s1">colmom=color_moments(name)</span>
+
+    <span class="s1">lower = </span><span class="s3">0.66 </span><span class="s1">* np.mean(img)</span>
+    <span class="s1">upper = </span><span class="s3">1.33 </span><span class="s1">* np.mean(img)</span>
+    <span class="s1">edges = cv.Canny(img</span><span class="s0">, </span><span class="s1">lower</span><span class="s0">, </span><span class="s1">upper)</span>
+
+    <span class="s2"># print(edges)</span>
+
+    <span class="s1">gray = cv.cvtColor(img</span><span class="s0">, </span><span class="s1">cv.COLOR_BGR2GRAY)</span>
+
+    <span class="s1">graycom = skimage.feature.graycomatrix(gray</span><span class="s0">, </span><span class="s1">[</span><span class="s3">1</span><span class="s1">]</span><span class="s0">, </span><span class="s1">[</span><span class="s3">0</span><span class="s0">, </span><span class="s1">np.pi / </span><span class="s3">4</span><span class="s0">, </span><span class="s1">np.pi / </span><span class="s3">2</span><span class="s0">, </span><span class="s3">3 </span><span class="s1">* np.pi / </span><span class="s3">4</span><span class="s1">]</span><span class="s0">, </span><span class="s1">levels=</span><span class="s3">256</span><span class="s1">)</span>
+
+  <span class="s2">#  contrast = feature.graycoprops(graycom, 'contrast')</span>
+  <span class="s2">#  dissimilarity = feature.graycoprops(graycom, 'dissimilarity')</span>
+  <span class="s2">#  homogeneity = feature.graycoprops(graycom, 'homogeneity')</span>
+  <span class="s2">#  energy = feature.graycoprops(graycom, 'energy')</span>
+  <span class="s2">#  correlation = feature.graycoprops(graycom, 'correlation')</span>
+  <span class="s2">#  ASM = feature.graycoprops(graycom, 'ASM')</span>
+
+    <span class="s1">gray = cv.cvtColor(img</span><span class="s0">, </span><span class="s1">cv.COLOR_BGR2GRAY)</span>
+    <span class="s1">sift = cv.SIFT_create()</span>
+    <span class="s1">kp = sift.detect(gray</span><span class="s0">, None</span><span class="s1">)</span>
+
+    <span class="s1">kplist = []</span>
+    <span class="s0">for </span><span class="s1">point </span><span class="s0">in </span><span class="s1">kp:</span>
+        <span class="s1">temp = (point.pt</span><span class="s0">, </span><span class="s1">point.size</span><span class="s0">, </span><span class="s1">point.angle</span><span class="s0">, </span><span class="s1">point.response</span><span class="s0">, </span><span class="s1">point.octave</span><span class="s0">, </span><span class="s1">point.class_id)</span>
+        <span class="s1">kplist.append(temp)</span>
+
+
+    <span class="s2">#colmom=None</span>
+    <span class="s2">#kplist=None</span>
+    <span class="s1">fff=index(name</span><span class="s0">,</span><span class="s1">hist1</span><span class="s0">,</span><span class="s1">colmom</span><span class="s0">,</span><span class="s1">edges</span><span class="s0">,</span><span class="s1">graycom</span><span class="s0">,</span><span class="s1">kplist)</span>
+
+
+
+
+
+   <span class="s2"># fff.n = name</span>
+   <span class="s2"># fff.c = hist1</span>
+   <span class="s2"># fff.s = edges</span>
+   <span class="s2"># fff.t = graycom</span>
+   <span class="s2"># fff.p = kp</span>
+
+    <span class="s1">pickle.dump(fff</span><span class="s0">, </span><span class="s1">open(</span><span class="s4">&quot;variableStoringFile.dat&quot;</span><span class="s0">, </span><span class="s4">&quot;ab&quot;</span><span class="s1">))</span>
+
+    <span class="s1">print(</span><span class="s4">&quot;success &quot;</span><span class="s1">+name)</span>
+
+
+<span class="s0">import </span><span class="s1">os</span>
+<span class="s2">#os.chdir('Covid19-dataset/test/Covid/')</span>
+<span class="s0">for </span><span class="s1">file </span><span class="s0">in </span><span class="s1">os.listdir(</span><span class="s4">'images/test/'</span><span class="s1">):</span>
+    <span class="s1">file_path = </span><span class="s4">f&quot;</span><span class="s0">{</span><span class="s4">'images/test/'</span><span class="s0">}{</span><span class="s1">file</span><span class="s0">}</span><span class="s4">&quot;</span>
+    <span class="s2">#print(file_path)</span>
+    <span class="s1">create_index(file_path)</span>
+
+<span class="s1">objects = []</span>
+<span class="s0">with </span><span class="s1">(open(</span><span class="s4">&quot;variableStoringFile.dat&quot;</span><span class="s0">, </span><span class="s4">&quot;rb&quot;</span><span class="s1">)) </span><span class="s0">as </span><span class="s1">openfile:</span>
+    <span class="s0">while True</span><span class="s1">:</span>
+        <span class="s0">try</span><span class="s1">:</span>
+            <span class="s1">objects.append(pickle.load(openfile))</span>
+           <span class="s2"># print(objects)</span>
+        <span class="s0">except </span><span class="s1">EOFError:</span>
+            <span class="s0">break</span>
+
+<span class="s2">#print(objects[2].n)</span>
+<span class="s2">#print(objects[3].n)</span></pre>
+</body>
+</html>
